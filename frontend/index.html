@@ -6,10 +6,12 @@
     <link href="./src/output.css" rel="stylesheet" />
   </head>
   <body class="bg-[#CFD8DC] text-[#212121]">
-    <section id="signup-section">
+    <h2 id="status" class="absolute top-5 left-5 text-lg font-semibold"></h2>
+    <!-- Signup form  -->
+    <section id="signup-section" class="md:flex md:justify-center">
       <h2 class="text-4xl font-bold text-center my-7">Signup</h2>
       <form onsubmit="handleSignup(event)"
-        class="flex flex-col items-center p-10 py-14 m-6 rounded-sm shadow-slate-950 shadow-2xl/30 text-xl text-[#212121]/90 font-semibold bg-slate-100/50 [&_input]:border [&_input]:w-fit [&_input]:mb-3 [&_input]:rounded-sm [&_input]:bg-gray-100 [&_label]:my-2 [&_label]:cursor-pointer"
+        class="flex flex-col items-stretch p-10 py-14 m-6 rounded-sm shadow-slate-950 shadow-2xl/30 text-xl text-[#212121]/90 font-semibold bg-slate-100/50 [&_input]:border [&_input]:mb-3 [&_input]:rounded-sm [&_input]:bg-gray-100 [&_input]:w-full [&_label]:my-2 [&_label]:cursor-pointer"
       >
         <label for="name"
           >Name <input type="text" id="name" name="userName" required
@@ -30,10 +32,12 @@
         <button type="submit" class="bg-linear-to-r my-2 from-emerald-500 to-emerald-600 text-gray-200/90 font-semibold px-2 py-1 cursor-pointer hover:to-emerald-500 hover:brightness-110 transition-all duration-100 rounded-md border border-gray-900 active:scale-95">Create an account</button>
       </form>
     </section>
-    <section id="login-section" class="hidden"> 
+
+    <!-- login form -->
+    <section id="login-section" class="hidden md:justify-center"> 
         <h2 class="text-4xl font-bold text-center my-7">Login</h2>
       <form onsubmit="handleLogin(event)"
-        class="flex flex-col items-center p-10 py-14 m-6 rounded-sm shadow-slate-950 shadow-2xl/30 text-xl text-[#212121]/80 font-semibold bg-slate-100/50 [&_input]:border [&_input]:w-fit [&_input]:mb-3 [&_input]:rounded-sm [&_input]:bg-gray-100 [&_label]:my-2 [&_label]:cursor-pointer"
+        class="flex flex-col items-stretch p-10 py-14 m-6 rounded-sm shadow-slate-950 shadow-2xl/30 text-xl text-[#212121]/90 font-semibold bg-slate-100/50 [&_input]:border [&_input]:mb-3 [&_input]:rounded-sm [&_input]:bg-gray-100 [&_input]:w-full [&_label]:my-2 [&_label]:cursor-pointer"
       >
        
 
@@ -48,7 +52,8 @@
         <button type="submit" class="bg-linear-to-r my-2 from-emerald-500 to-emerald-600 text-gray-200/90 font-semibold px-2 py-1 cursor-pointer hover:to-emerald-500 hover:brightness-110 transition-all duration-100 rounded-md border border-gray-900 active:scale-95">Login</button>
       </form>
     </section>
-    <button onclick="toggleSignIn()" id="toggleBtn" class="text-3xl opacity-90 ml-4 font-semibold cursor-pointer hover:text-emerald-700">Login</button>
+    <button onclick="toggleSignIn()" id="toggleBtn" class="text-3xl opacity-90 ml-4 font-semibold cursor-pointer hover:text-emerald-700 absolute bottom-5 md:bottom-30 left-10 underline drop-shadow-2xl">Login</button>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="index.js"></script>
   </body>
 </html>
