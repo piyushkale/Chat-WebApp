@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="./src/output.css" rel="stylesheet" />
+  </head>
+  <body class="bg-[#CFD8DC] text-[#212121]">
+    <section id="signup-section">
+      <h2 class="text-4xl font-bold text-center my-7">Signup</h2>
+      <form onsubmit="handleSignup(event)"
+        class="flex flex-col items-center p-10 py-14 m-6 rounded-sm shadow-slate-950 shadow-2xl/30 text-xl text-[#212121]/90 font-semibold bg-slate-100/50 [&_input]:border [&_input]:w-fit [&_input]:mb-3 [&_input]:rounded-sm [&_input]:bg-gray-100 [&_label]:my-2 [&_label]:cursor-pointer"
+      >
+        <label for="name"
+          >Name <input type="text" id="name" name="userName" required
+        /></label>
+
+        <label for="email"
+          >Email <input type="email" id="email" name="userEmail" required
+        /></label>
+
+        <label for="number"
+          >Phn. no
+          <input type="number" id="number" name="userNumber" required />
+        </label>
+        <label for="password"
+          >Password
+          <input type="password" id="password" name="userPassword" required />
+        </label>
+        <button type="submit" class="bg-linear-to-r my-2 from-emerald-500 to-emerald-600 text-gray-200/90 font-semibold px-2 py-1 cursor-pointer hover:to-emerald-500 hover:brightness-110 transition-all duration-100 rounded-md border border-gray-900 active:scale-95">Create an account</button>
+      </form>
+    </section>
+    <section id="login-section" class="hidden"> 
+        <h2 class="text-4xl font-bold text-center my-7">Login</h2>
+      <form onsubmit="handleLogin(event)"
+        class="flex flex-col items-center p-10 py-14 m-6 rounded-sm shadow-slate-950 shadow-2xl/30 text-xl text-[#212121]/80 font-semibold bg-slate-100/50 [&_input]:border [&_input]:w-fit [&_input]:mb-3 [&_input]:rounded-sm [&_input]:bg-gray-100 [&_label]:my-2 [&_label]:cursor-pointer"
+      >
+       
+
+        <label for="l-cred"
+          >Email/Phn <input type="text" id="l-cred" name="loginCred" required
+        /></label>
+
+         <label for="l-password"
+          >Password
+          <input type="password" id="l-password" name="loginPassword" required />
+        </label>
+        <button type="submit" class="bg-linear-to-r my-2 from-emerald-500 to-emerald-600 text-gray-200/90 font-semibold px-2 py-1 cursor-pointer hover:to-emerald-500 hover:brightness-110 transition-all duration-100 rounded-md border border-gray-900 active:scale-95">Login</button>
+      </form>
+    </section>
+    <button onclick="toggleSignIn()" id="toggleBtn" class="text-3xl opacity-90 ml-4 font-semibold cursor-pointer hover:text-emerald-700">Login</button>
+    <script src="index.js"></script>
+  </body>
+</html>
