@@ -1,5 +1,6 @@
 const sendError = require("../services/handleError");
 const userModel = require("../models/userModel");
+const messageModel = require("../models/messageModel");
 
 const sendMessage = async (req, res) => {
   try {
@@ -16,4 +17,15 @@ const sendMessage = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage };
+const getAllMessages = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const data = await messageModel.findAll();
+
+    res.status(200).json({ messages: data, userId });
+  } catch (error) {
+    return sendError(res, error, 500);
+  }
+};
+
+module.exports = { sendMessage, getAllMessages };
