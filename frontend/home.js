@@ -13,3 +13,24 @@ window.onload = () => {
     behavior: "smooth",
   });
 };
+
+async function formSendMessage(event) {
+  event.preventDefault()
+  const chat = event.target.chat.value;
+  if (!chat) {
+    alert("Cant proceed with empty input!");
+    return;
+  }
+  try {
+    const response = await axios.post(
+      "/message/send",
+      { chat },
+      { headers: { Authorization: token } },
+    );
+
+    console.log(response.data.msg);
+    event.target.reset();
+  } catch (error) {
+    console.log(error.response?.data?.message || "Something went wrong");
+  }
+}

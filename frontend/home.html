@@ -40,16 +40,19 @@
 
     <!-- Input -->
     <div class="shrink-0 bg-slate-900/70 p-6 border-t border-white/10">
-      <form class="flex gap-4">
+      <form class="flex gap-4" onsubmit="formSendMessage(event)">
         <input 
           type="text"
+          name="chat"
           placeholder="Type a message..."
+          required
           class="flex-1 py-2 px-3 text-lg text-white 
                  rounded-md bg-gray-500/40 
                  outline-none 
                  focus:ring-2 focus:ring-emerald-400"
         />
         <button 
+        type="submit"
           class="px-6 bg-linear-to-r from-emerald-400 to-green-700 
                  rounded-md font-bold hover:to-emerald-500 transition-all duration-300 cursor-pointer">
           Send
@@ -61,7 +64,7 @@
 
 </section>
 
-
+ <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="home.js"></script>
   </body>
 </html>
