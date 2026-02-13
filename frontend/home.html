@@ -12,55 +12,51 @@
     />
     <title>WebChat</title>
   </head>
-  <body class="hidden font-[Outfit] selection:bg-orange-500 selection:text-black">
- <section class="bg-[radial-gradient(circle_at_top_left,#1e1b4b,#020617)]
- text-white h-screen flex flex-col">
-
-  <!-- Header -->
-  <div class="bg-linear-to-r from-slate-700/70 via-slate-600/50 to-slate-600/70 border-b border-gray-500
- backdrop-blur-md text-gray-100 text-3xl font-semibold p-4 shrink-0">
-    <h2 class="text-3xl">Group Name</h2>
-  </div>
-
-  <!-- Chat Container -->
-  <div class="flex flex-col flex-1 min-h-0 backdrop-blur-2xl">
-
-    <!-- Messages -->
-    <ul 
-      id="chatBox"
-      class="flex-1 flex flex-col min-h-0 overflow-y-auto py-10 space-y-2 bg-slate-950/70 px-10 md:text-xl gap-11"
+  <body
+    class="hidden font-[Outfit] selection:bg-orange-500 selection:text-black"
+  >
+    <section
+      class="bg-[radial-gradient(circle_at_top_left,#1e1b4b,#020617)] text-white h-screen flex flex-col"
     >
-      <!-- Many messages -->
-   
-  </ul>
+      <!-- Header -->
+      <div
+        class="bg-linear-to-r from-slate-700/70 via-slate-600/50 to-slate-600/70 border-b border-gray-500 backdrop-blur-md text-gray-100 text-3xl font-semibold p-4 shrink-0"
+      >
+        <h2 class="text-3xl">Group Name</h2>
+      </div>
 
-    <!-- Input -->
-    <div class="shrink-0 bg-slate-900/70 p-6 border-t border-white/10">
-      <form class="flex gap-4" onsubmit="formSendMessage(event)">
-        <input 
-          type="text"
-          name="chat"
-          placeholder="Type a message..."
-          required
-          class="flex-1 py-2 px-3 text-lg text-white 
-                 rounded-md bg-gray-500/40 
-                 outline-none 
-                 focus:ring-2 focus:ring-emerald-400"
-        />
-        <button 
-        type="submit"
-          class="px-6 bg-linear-to-r from-emerald-400 to-green-700 
-                 rounded-md font-bold hover:to-emerald-500 transition-all duration-300 cursor-pointer">
-          Send
-        </button>
-      </form>
-    </div>
+      <!-- Chat Container -->
+      <div class="flex flex-col flex-1 min-h-0 backdrop-blur-2xl">
+        <!-- Messages -->
+        <ul
+          id="chatBox"
+          class="flex-1 flex flex-col min-h-0 overflow-y-auto py-10 space-y-2 bg-slate-950/70 px-10 md:text-xl gap-11"
+        >
+          <!-- Many messages -->
+        </ul>
 
-  </div>
-
-</section>
-
- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <!-- Input -->
+        <div class="shrink-0 bg-slate-900/70 p-6 border-t border-white/10">
+          <form class="flex gap-4" onsubmit="formSendMessage(event)">
+            <input
+              type="text"
+              name="chat"
+              placeholder="Type a message..."
+              required
+              class="flex-1 py-2 px-3 text-lg text-white rounded-md bg-gray-500/40 outline-none focus:ring-2 focus:ring-emerald-400"
+            />
+            <button
+              type="submit"
+              class="px-6 bg-linear-to-r from-emerald-400 to-green-700 rounded-md font-bold hover:to-emerald-500 transition-all duration-300 cursor-pointer"
+            >
+              Send
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="home.js"></script>
   </body>
 </html>
