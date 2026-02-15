@@ -38,7 +38,10 @@ const getMessage = async (req, res) => {
 const getAllMessages = async (req, res) => {
   try {
     const { userId } = req.user;
-    const data = await messageModel.findAll();
+    const data = await messageModel.findAll({include:{
+      model:userModel,
+      attributes:['name']
+    }});
 
     res.status(200).json({ messages: data, userId });
   } catch (error) {
