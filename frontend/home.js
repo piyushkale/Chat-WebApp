@@ -27,7 +27,8 @@ window.onload = async () => {
     const chat = data.chat;
     const senderId = data.userId;
     const createdAt = data.createdAt;
-    newMessage(chat, senderId, createdAt);
+    const userName = data.userName
+    newMessage(chat, senderId, createdAt,userName);
   });
 };
 
@@ -55,16 +56,9 @@ async function formSendMessage(event) {
   }
 }
 
-// Retrieving new message
 
-// socket.on("message", (data) => {
-//   const chat = data.chat;
-//   const senderId = data.userId;
-//   const createdAt = data.createdAt;
-//   newMessage(chat, senderId, createdAt);
-// });
 
-function newMessage(chat, senderId, createdAt) {
+function newMessage(chat, senderId, createdAt,userName) {
   const ul = document.getElementById("chatBox");
   const date = new Date(createdAt);
   const li = document.createElement("li");
@@ -85,7 +79,7 @@ function newMessage(chat, senderId, createdAt) {
 
   const spanName = document.createElement("span");
   spanName.className = "absolute left-0 -top-7 text-lg";
-  spanName.innerText = senderId === currentUserId ? "You" : `user ${senderId}`;
+  spanName.innerText = senderId === currentUserId ? "You" : `user ${userName}`;
 
   li.append(spanTime, spanName);
   ul.appendChild(li);
@@ -105,6 +99,7 @@ async function loadAllMessages() {
     const ul = document.getElementById("chatBox");
     ul.innerHTML = "";
     messages.forEach((message) => {
+      console.log(message)
       const date = new Date(message.createdAt);
 
       const li = document.createElement("li");
@@ -121,7 +116,7 @@ async function loadAllMessages() {
       const spanName = document.createElement("span");
       spanName.className = "absolute left-0 -top-7 text-lg";
       spanName.innerText =
-        message.userId === currentUserId ? "You" : `user ${message.userId}`;
+        message.userId === currentUserId ? "You" : `user ${message.user.name}`;
 
       li.append(spanTime, spanName);
       ul.appendChild(li);
