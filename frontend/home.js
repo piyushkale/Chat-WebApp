@@ -1,6 +1,7 @@
 let token;
 let socket;
 let currentUserId;
+let currentRoom;
 window.onload = async () => {
   token = localStorage.getItem("token");
   if (!token) {
@@ -27,12 +28,20 @@ window.onload = async () => {
     const chat = data.chat;
     const senderId = data.userId;
     const createdAt = data.createdAt;
-    const userName = data.userName
-    newMessage(chat, senderId, createdAt,userName);
+    const userName = data.userName;
+    newMessage(chat, senderId, createdAt, userName);
+  });
+
+  socket.on("privateMessage", (data) => {
+    const chat = data.chat;
+    const senderId = data.userId;
+    const createdAt = data.createdAt;
+    const userName = data.userName;
+    currentRoomMessages(chat, senderId, createdAt, userName);
   });
 };
 
-async function formSendMessage(event) {
+function formSendMessage(event) {
   event.preventDefault();
   const chat = event.target.chat.value;
   if (!chat) {
@@ -40,25 +49,28 @@ async function formSendMessage(event) {
     return;
   }
   try {
-    // const response = await axios.post(
-    //   "/message/send",
-    //   { chat },
-    //   { headers: { Authorization: token } },
-    // );
-    // Sending new message
-
+    if (currentRoom) {
+      socket.emit("privateMessage", { chat, currentRoom });
+      event.target.reset();
+      return;
+    }
     socket.emit("message", { chat });
-
-    // console.log(response.data.msg);
     event.target.reset();
   } catch (error) {
     console.log(error.response?.data?.message || "Something went wrong");
   }
 }
 
+function handleJoinRoom(event) {
+  event.preventDefault();
+  const email = event.target.email.value;
+  socket.emit("join-room", email);
+  currentRoom = email;
+  document.getElementById("chatBox").innerHTML = "";
+  event.target.reset();
+}
 
-
-function newMessage(chat, senderId, createdAt,userName) {
+function newMessage(chat, senderId, createdAt, userName) {
   const ul = document.getElementById("chatBox");
   const date = new Date(createdAt);
   const li = document.createElement("li");
@@ -99,7 +111,6 @@ async function loadAllMessages() {
     const ul = document.getElementById("chatBox");
     ul.innerHTML = "";
     messages.forEach((message) => {
-      console.log(message)
       const date = new Date(message.createdAt);
 
       const li = document.createElement("li");
@@ -116,7 +127,7 @@ async function loadAllMessages() {
       const spanName = document.createElement("span");
       spanName.className = "absolute left-0 -top-7 text-lg";
       spanName.innerText =
-        message.userId === currentUserId ? "You" : `user ${message.user.name}`;
+        message.userId === currentUserId ? "You" : `${message.user.name}`;
 
       li.append(spanTime, spanName);
       ul.appendChild(li);
@@ -127,63 +138,33 @@ async function loadAllMessages() {
   }
 }
 
-// use socket.on("message") and append new message to ul
+function currentRoomMessages(chat, senderId, createdAt, userName) {
+  const ul = document.getElementById("chatBox");
+  const date = new Date(createdAt);
+  const li = document.createElement("li");
+  li.className =
+    "relative text-2xl max-w-[50%] min-w-[20%] p-2 bg-gray-800/80 wrap-anywhere outline-gray-500/50 outline rounded-md";
 
-// async function displayMessages() {
-//   try {
-//     const response = await axios.get("/message/getMessage", {
-//       headers: { Authorization: token },
-//     });
+  if (senderId === currentUserId) {
+    li.classList.add("self-end");
+  } else {
+    li.classList.add("self-start");
+  }
 
-//     const message = response.data.message;
-//     // const userId = response.data.userId;
+  li.innerText = chat;
 
-//     const ul = document.getElementById("chatBox");
+  const spanTime = document.createElement("span");
+  spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
+  spanTime.innerText = date.toLocaleString();
 
-//     const date = new Date(message.createdAt);
+  const spanName = document.createElement("span");
+  spanName.className = "absolute left-0 -top-7 text-lg";
+  spanName.innerText = senderId === currentUserId ? "You" : `${userName}`;
 
-//     const li = document.createElement("li");
-//     li.className =
-//       "relative text-2xl max-w-[50%] min-w-[20%] p-2 bg-gray-800/80 wrap-anywhere outline-gray-500/50 outline rounded-md";
-
-//     if (message.userId === currentUserId) {
-//       li.classList.add("self-end");
-//     } else {
-//       li.classList.add("self-start");
-//     }
-
-//     li.innerText = message.chat;
-
-//     const spanTime = document.createElement("span");
-//     spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
-//     spanTime.innerText = date.toLocaleString();
-
-//     const spanName = document.createElement("span");
-//     spanName.className = "absolute left-0 -top-7 text-lg";
-//     spanName.innerText =
-//       message.userId === currentUserId ? "You" : `user ${message.userId}`;
-
-//     li.append(spanTime, spanName);
-//     ul.appendChild(li);
-
-//     ul.scrollTo({
-//       top: ul.scrollHeight,
-//       behavior: "smooth",
-//     });
-
-//     // Start waiting again AFTER response
-//     displayMessages(userId);
-//   } catch (error) {
-//     console.log(error);
-//     setTimeout(() => displayMessages(userId), 2000);
-//   }
-// }
-
-// setInterval(() => {
-//   displayMessages();
-//   const chatBox = document.getElementById("chatBox");
-//   chatBox.scrollTo({
-//     top: chatBox.scrollHeight,
-//     behavior: "smooth",
-//   });
-// }, 3000);
+  li.append(spanTime, spanName);
+  ul.appendChild(li);
+  ul.scrollTo({
+    top: ul.scrollHeight,
+    behavior: "smooth",
+  });
+}

@@ -15,25 +15,42 @@
   <body
     class="hidden font-[Outfit] selection:bg-orange-500 selection:text-black"
   >
-    <section
-      class="bg-[radial-gradient(circle_at_top_left,#1e1b4b,#020617)] text-white h-screen flex flex-col"
-    >
+    <section class="bg-gray-800 text-white h-screen flex flex-col">
       <!-- Header -->
       <div
-        class="bg-linear-to-r from-slate-700/70 via-slate-600/50 to-slate-600/70 border-b border-gray-500 backdrop-blur-md text-gray-100 text-3xl font-semibold p-4 shrink-0"
+        class="bg-linear-to-r from-slate-700/70 via-slate-500/50 to-slate-600/70 border-b border-gray-500 text-gray-100 text-3xl font-semibold p-4 shrink-0"
       >
-        <h2 class="text-3xl">Group Name</h2>
+        <h2 class="text-3xl">WebChat App</h2>
       </div>
 
       <!-- Chat Container -->
-      <div class="flex flex-col flex-1 min-h-0 backdrop-blur-2xl">
+      <div class="flex flex-col flex-1 min-h-0">
         <!-- Messages -->
-        <ul
-          id="chatBox"
-          class="flex-1 flex flex-col min-h-0 overflow-y-auto py-10 space-y-2 bg-slate-950/70 px-10 md:text-xl gap-11"
-        >
-          <!-- Many messages -->
-        </ul>
+        <div class="flex-1 flex min-h-0 overflow-y-auto">
+          <section
+            class="w-[15%] overflow-y-auto flex flex-col [&_h2]:bg-gray-900 [&_h2]:p-2 [&_h2]:py-3 [&_h2]:border-y [&_h2]:border-gray-500/50 [&_h2]:w-full [&_h2]:cursor-pointer [&_h2]:hover:bg-gray-700"
+          >
+            <form onsubmit="handleJoinRoom(event)" class="p-1">
+              <input
+                class="w-full bg-gray-100/90 text-black"
+                type="email"
+                name="email"
+                placeholder="Join room" required
+              /><br /><button type="submit" class="bg-blue-600/90 px-2 rounded-sm mt-2 cursor-pointer hover:scale-95">Join</button>
+            </form>
+            <h2>Pritesh</h2>
+            <h2>Akast</h2>
+            <h2>Sanket</h2>
+            <h2>Aditya</h2>
+            <h2>Jack</h2>
+          </section>
+          <ul
+            id="chatBox"
+            class="flex-1 flex flex-col min-h-0 overflow-y-auto py-10 space-y-2 bg-slate-900/70 px-10 md:text-xl gap-11"
+          >
+            <!-- Many messages -->
+          </ul>
+        </div>
 
         <!-- Input -->
         <div class="shrink-0 bg-slate-900/70 p-6 border-t border-white/10">
