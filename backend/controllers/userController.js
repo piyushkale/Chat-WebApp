@@ -66,4 +66,14 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { signupUser, loginUser };
+const allUsers = async (req, res) => {
+  try {
+    const {userId}=req.user
+    const users = await userModel.findAll({ attributes: ["id", "name"] });
+    res.status(200).json({users,userId});
+  } catch (error) {
+    return sendError(res, error, 500);
+  }
+};
+
+module.exports = { signupUser, loginUser, allUsers };
