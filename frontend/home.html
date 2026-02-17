@@ -29,6 +29,7 @@
         <div class="flex-1 flex min-h-0 overflow-y-auto">
           <section
             class="w-[15%] overflow-y-auto flex flex-col [&_h2]:bg-gray-900 [&_h2]:p-2 [&_h2]:py-3 [&_h2]:border-y [&_h2]:border-gray-500/50 [&_h2]:w-full [&_h2]:cursor-pointer [&_h2]:hover:bg-gray-700"
+            id="users-section"
           >
             <form onsubmit="handleJoinRoom(event)" class="p-1">
               <input
@@ -38,11 +39,7 @@
                 placeholder="Join room" required
               /><br /><button type="submit" class="bg-blue-600/90 px-2 rounded-sm mt-2 cursor-pointer hover:scale-95">Join</button>
             </form>
-            <h2>Pritesh</h2>
-            <h2>Akast</h2>
-            <h2>Sanket</h2>
-            <h2>Aditya</h2>
-            <h2>Jack</h2>
+           <h2 onclick="loadAllMessages()">Public Chat</h2>
           </section>
           <ul
             id="chatBox"

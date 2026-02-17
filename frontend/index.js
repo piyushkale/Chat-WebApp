@@ -62,13 +62,13 @@ function displayStatus(status, message) {
   if (status == "success") {
     const divStatus = document.getElementById("status");
     divStatus.innerText = message;
-    divStatus.classList.add("text-emerald-600");
+    divStatus.classList.toggle("text-emerald-600");
     vanishDiv = divStatus;
   }
   if (status == "fail") {
     const divStatus = document.getElementById("status");
     divStatus.innerText = message;
-    divStatus.classList.add("text-red-500");
+    divStatus.classList.toggle("text-red-500");
     vanishDiv = divStatus;
   }
 
