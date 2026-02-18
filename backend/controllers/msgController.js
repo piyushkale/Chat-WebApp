@@ -12,7 +12,8 @@ const sendMessage = async (req, res) => {
       return sendError(res, null, 400, "Required input Missing!");
     }
     const user = await userModel.findByPk(userId);
-    const msg = await user.createMessage({ chat });
+    // const msg = await user.createMessage({ chat });
+    const msg = await messageModel.create({chat,userId})
 
     waitingClients.forEach((client) => {
       client.status(200).json({ message: msg });
@@ -40,8 +41,10 @@ const getAllMessages = async (req, res) => {
   try {
     const { userId } = req.user;
     const data = await messageModel.findAll({
-      include: {
+      where:{receiverId:null}
+      ,include: {
         model: userModel,
+        as:'sender',
         attributes: ["name"],
       },
     });
