@@ -28,10 +28,10 @@ window.onload = async () => {
   });
   socket.on("message", (data) => {
     const chat = data.chat;
-    const senderId = data.userId.id;
+    const senderId = data.userId;
     const createdAt = data.createdAt;
     const userName = data.userName;
-    if (senderId===currentReceiverId) {
+    if (!currentReceiverId) {
       newMessage(chat, senderId, createdAt, userName);
     }
   });
@@ -41,9 +41,11 @@ window.onload = async () => {
     const senderId = data.userId;
     const createdAt = data.createdAt;
     const userName = data.userName;
-    const receiverId = data.receiverId
-    if (  (senderId === currentReceiverId && receiverId === currentUserId) ||
-  (senderId === currentUserId && receiverId === currentReceiverId)) {
+    const receiverId = data.receiverId;
+    if (
+      (senderId === currentReceiverId && receiverId === currentUserId) ||
+      (senderId === currentUserId && receiverId === currentReceiverId)
+    ) {
       currentRoomMessages(chat, senderId, createdAt, userName);
     }
   });
@@ -57,37 +59,35 @@ async function displayAllUsers() {
   });
 
   const users = response.data.users;
-  currentUserId= response.data.userId
+  currentUserId = response.data.userId;
   users.forEach((user) => {
     const h2 = document.createElement("h2");
-    if(user.id===currentUserId){}
-    h2.innerText = user.id === currentUserId?`${user.name} (You)`:user.name
+    if (user.id === currentUserId) {
+    }
+    h2.innerText = user.id === currentUserId ? `${user.name} (You)` : user.name;
     // h2.innerText = user.name;
     section.appendChild(h2);
     h2.onclick = () => {
       currentReceiverId = user.id;
       if (activeUserElement) {
-        activeUserElement.classList.remove('invert')
+        activeUserElement.classList.remove("invert");
       }
-      h2.classList.add('invert')
-      activeUserElement=h2
-      displayPersonalMessages(currentUserId,currentReceiverId);
-      
+      h2.classList.add("invert");
+      activeUserElement = h2;
+      displayPersonalMessages(currentUserId, currentReceiverId);
     };
   });
 }
 
 async function displayPersonalMessages(currentUserId, currentReceiverId) {
   try {
-    const response = await axios.get(
-      "/message/personalMessages",{
-        params:{
-          senderId:currentUserId,
-          receiverId:currentReceiverId
-        },
-        headers: { Authorization: token },
+    const response = await axios.get("/message/personalMessages", {
+      params: {
+        senderId: currentUserId,
+        receiverId: currentReceiverId,
       },
-    );
+      headers: { Authorization: token },
+    });
     const messages = response.data.messages;
     currentUserId = response.data.userId;
     const ul = document.getElementById("chatBox");
@@ -134,7 +134,7 @@ function formSendMessage(event) {
   }
   try {
     if (currentReceiverId) {
-      socket.emit("privateMessage", { chat, receiverId:currentReceiverId });
+      socket.emit("privateMessage", { chat, receiverId: currentReceiverId });
       event.target.reset();
       return;
     }
@@ -159,7 +159,7 @@ function newMessage(chat, senderId, createdAt, userName) {
   const date = new Date(createdAt);
   const li = document.createElement("li");
   li.className =
-    "relative text-2xl max-w-[50%] min-w-[20%] p-2 bg-gray-800/80 wrap-anywhere outline-gray-500/50 outline rounded-md";
+    "relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md";
 
   if (senderId === currentUserId) {
     li.classList.add("self-end", "bg-gray-500/40");
@@ -175,7 +175,7 @@ function newMessage(chat, senderId, createdAt, userName) {
 
   const spanName = document.createElement("span");
   spanName.className = "absolute left-0 -top-7 text-lg";
-  spanName.innerText = senderId === currentUserId ? "You" : `user ${userName}`;
+  spanName.innerText = senderId === currentUserId ? "You" : `${userName}`;
 
   li.append(spanTime, spanName);
   ul.appendChild(li);
@@ -186,10 +186,19 @@ function newMessage(chat, senderId, createdAt, userName) {
 }
 
 async function loadAllMessages() {
+  currentReceiverId = null;
+  const public_chat_h2 = document.getElementById("public-chat-h2");
+  if (activeUserElement) {
+    activeUserElement.classList.remove("invert");
+  }
+  public_chat_h2.classList.add("invert");
+  activeUserElement = public_chat_h2;
+  
   try {
     const response = await axios.get("/message/allMessages", {
       headers: { Authorization: token },
     });
+    console.log(response.data);
     const messages = response.data.messages;
     currentUserId = response.data.userId;
     const ul = document.getElementById("chatBox");
@@ -211,7 +220,7 @@ async function loadAllMessages() {
       const spanName = document.createElement("span");
       spanName.className = "absolute left-0 -top-7 text-lg";
       spanName.innerText =
-        message.userId === currentUserId ? "You" : `${message.user.name}`;
+        message.userId === currentUserId ? "You" : `${message.sender.name}`;
 
       li.append(spanTime, spanName);
       ul.appendChild(li);
