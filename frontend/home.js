@@ -27,11 +27,21 @@ window.onload = async () => {
     console.log("Socket ID:", socket.id);
   });
   socket.on("message", (data) => {
-    const chat = data.chat;
-    const senderId = data.userId;
-    const createdAt = data.createdAt;
-    const userName = data.userName;
     if (!currentReceiverId) {
+      if (data.messageType === "Media") {
+        const url = data.url;
+        const senderId = data.userId;
+        const createdAt = data.createdAt;
+        const userName = data.userName;
+        const media = "img";
+        newMessage(url, senderId, createdAt, userName, media);
+        return;
+      }
+
+      const chat = data.chat;
+      const senderId = data.userId;
+      const createdAt = data.createdAt;
+      const userName = data.userName;
       newMessage(chat, senderId, createdAt, userName);
     }
   });
@@ -42,10 +52,21 @@ window.onload = async () => {
     const createdAt = data.createdAt;
     const userName = data.userName;
     const receiverId = data.receiverId;
+
     if (
       (senderId === currentReceiverId && receiverId === currentUserId) ||
       (senderId === currentUserId && receiverId === currentReceiverId)
     ) {
+      if (data.messageType === "Media") {
+        const url = data.url;
+        const senderId = data.userId;
+        const createdAt = data.createdAt;
+        const userName = data.userName;
+        const media = "img";
+        currentRoomMessages(url, senderId, createdAt, userName, media);
+        return;
+      }
+
       currentRoomMessages(chat, senderId, createdAt, userName);
     }
   });
@@ -94,6 +115,29 @@ async function displayPersonalMessages(currentUserId, currentReceiverId) {
     ul.innerHTML = "";
     messages.forEach((message) => {
       const date = new Date(message.createdAt);
+
+      if (message.messageType === "Media") {
+        const li = document.createElement("li");
+        li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
+        if (message.userId === currentUserId) {
+          li.classList.add("self-end", "bg-gray-500/40");
+        } else {
+          li.classList.add("self-start", "bg-gray-800/80");
+        }
+        const img = document.createElement("img");
+        img.src = message.url;
+        img.className = "w-80 h-60 object-cover rounded-lg";
+        const spanTime = document.createElement("span");
+        spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
+        spanTime.innerText = `${date.toLocaleString()}`;
+        const spanName = document.createElement("span");
+        spanName.className = "absolute left-0 -top-7 text-lg";
+        spanName.innerText =
+          message.userId === currentUserId ? "You" : `${message.sender.name}`;
+        li.append(img, spanTime, spanName);
+        ul.appendChild(li);
+        return;
+      }
 
       const li = document.createElement("li");
       li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
@@ -145,6 +189,33 @@ function formSendMessage(event) {
   }
 }
 
+// uploading media
+async function sendFile() {
+  // make post request and send a file and get file url in response and senderId /receiverId
+  const fileInput = document.getElementById("file");
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("Add a image");
+    return;
+  }
+  const formData = new FormData();
+  formData.append("media", file);
+  formData.append("receiverId", currentReceiverId ? currentReceiverId : null);
+  try {
+    const res = await axios.post("/message/sendMedia", formData, {
+      headers: { Authorization: token },
+    });
+    if (currentReceiverId) {
+      socket.emit("privateMessage", { res: res.data });
+    } else {
+      socket.emit("message", { res: res.data });
+    }
+    fileInput.value = "";
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
 function handleJoinRoom(event) {
   event.preventDefault();
   const email = event.target.email.value;
@@ -154,31 +225,54 @@ function handleJoinRoom(event) {
   event.target.reset();
 }
 
-function newMessage(chat, senderId, createdAt, userName) {
+function newMessage(chat, senderId, createdAt, userName, media) {
   const ul = document.getElementById("chatBox");
   const date = new Date(createdAt);
-  const li = document.createElement("li");
-  li.className =
-    "relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md";
 
-  if (senderId === currentUserId) {
-    li.classList.add("self-end", "bg-gray-500/40");
+  if (media) {
+    const li = document.createElement("li");
+    li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
+    if (senderId === currentUserId) {
+      li.classList.add("self-end", "bg-gray-500/40");
+    } else {
+      li.classList.add("self-start", "bg-gray-800/80");
+    }
+    const img = document.createElement("img");
+    img.src = chat;
+    img.className = "w-80 h-60 object-cover rounded-lg";
+    const spanTime = document.createElement("span");
+    spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
+    spanTime.innerText = `${date.toLocaleString()}`;
+    const spanName = document.createElement("span");
+    spanName.className = "absolute left-0 -top-7 text-lg";
+    spanName.innerText = senderId === currentUserId ? "You" : `${userName}`;
+    li.append(img, spanTime, spanName);
+    ul.appendChild(li);
   } else {
-    li.classList.add("self-start", "bg-gray-800/80");
+    const li = document.createElement("li");
+    li.className =
+      "relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md";
+
+    if (senderId === currentUserId) {
+      li.classList.add("self-end", "bg-gray-500/40");
+    } else {
+      li.classList.add("self-start", "bg-gray-800/80");
+    }
+
+    li.innerText = chat;
+
+    const spanTime = document.createElement("span");
+    spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
+    spanTime.innerText = date.toLocaleString();
+
+    const spanName = document.createElement("span");
+    spanName.className = "absolute left-0 -top-7 text-lg";
+    spanName.innerText = senderId === currentUserId ? "You" : `${userName}`;
+
+    li.append(spanTime, spanName);
+    ul.appendChild(li);
   }
 
-  li.innerText = chat;
-
-  const spanTime = document.createElement("span");
-  spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
-  spanTime.innerText = date.toLocaleString();
-
-  const spanName = document.createElement("span");
-  spanName.className = "absolute left-0 -top-7 text-lg";
-  spanName.innerText = senderId === currentUserId ? "You" : `${userName}`;
-
-  li.append(spanTime, spanName);
-  ul.appendChild(li);
   ul.scrollTo({
     top: ul.scrollHeight,
     behavior: "smooth",
@@ -193,18 +287,40 @@ async function loadAllMessages() {
   }
   public_chat_h2.classList.add("invert");
   activeUserElement = public_chat_h2;
-  
+
   try {
     const response = await axios.get("/message/allMessages", {
       headers: { Authorization: token },
     });
-    console.log(response.data);
+   
     const messages = response.data.messages;
     currentUserId = response.data.userId;
     const ul = document.getElementById("chatBox");
     ul.innerHTML = "";
     messages.forEach((message) => {
       const date = new Date(message.createdAt);
+      if (message.messageType === "Media") {
+        const li = document.createElement("li");
+        li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
+        if (message.userId === currentUserId) {
+          li.classList.add("self-end", "bg-gray-500/40");
+        } else {
+          li.classList.add("self-start", "bg-gray-800/80");
+        }
+        const img = document.createElement("img");
+        img.src = message.url;
+        img.className = "w-80 h-60 object-cover rounded-lg";
+        const spanTime = document.createElement("span");
+        spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
+        spanTime.innerText = `${date.toLocaleString()}`;
+        const spanName = document.createElement("span");
+        spanName.className = "absolute left-0 -top-7 text-lg";
+        spanName.innerText =
+          message.userId === currentUserId ? "You" : `${message.sender.name}`;
+        li.append(img, spanTime, spanName);
+        ul.appendChild(li);
+        return;
+      }
 
       const li = document.createElement("li");
       li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
@@ -236,31 +352,53 @@ async function loadAllMessages() {
   }
 }
 
-function currentRoomMessages(chat, senderId, createdAt, userName) {
+function currentRoomMessages(chat, senderId, createdAt, userName, media) {
   const ul = document.getElementById("chatBox");
   const date = new Date(createdAt);
-  const li = document.createElement("li");
-  li.className =
-    "relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md";
 
-  if (senderId === currentUserId) {
-    li.classList.add("self-end", "bg-gray-500/40");
+  if (media) {
+    const li = document.createElement("li");
+    li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
+    if (senderId === currentUserId) {
+      li.classList.add("self-end", "bg-gray-500/40");
+    } else {
+      li.classList.add("self-start", "bg-gray-800/80");
+    }
+    const img = document.createElement("img");
+    img.src = chat;
+    img.className = "w-80 h-60 object-cover rounded-lg";
+    const spanTime = document.createElement("span");
+    spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
+    spanTime.innerText = `${date.toLocaleString()}`;
+    const spanName = document.createElement("span");
+    spanName.className = "absolute left-0 -top-7 text-lg";
+    spanName.innerText = senderId === currentUserId ? "You" : `${userName}`;
+    li.append(img, spanTime, spanName);
+    ul.appendChild(li);
   } else {
-    li.classList.add("self-start", "bg-gray-800/80");
+    const li = document.createElement("li");
+    li.className =
+      "relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md";
+
+    if (senderId === currentUserId) {
+      li.classList.add("self-end", "bg-gray-500/40");
+    } else {
+      li.classList.add("self-start", "bg-gray-800/80");
+    }
+
+    li.innerText = chat;
+
+    const spanTime = document.createElement("span");
+    spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
+    spanTime.innerText = date.toLocaleString();
+
+    const spanName = document.createElement("span");
+    spanName.className = "absolute left-0 -top-7 text-lg";
+    spanName.innerText = senderId === currentUserId ? "You" : `${userName}`;
+
+    li.append(spanTime, spanName);
+    ul.appendChild(li);
   }
-
-  li.innerText = chat;
-
-  const spanTime = document.createElement("span");
-  spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
-  spanTime.innerText = date.toLocaleString();
-
-  const spanName = document.createElement("span");
-  spanName.className = "absolute left-0 -top-7 text-lg";
-  spanName.innerText = senderId === currentUserId ? "You" : `${userName}`;
-
-  li.append(spanTime, spanName);
-  ul.appendChild(li);
   ul.scrollTo({
     top: ul.scrollHeight,
     behavior: "smooth",
