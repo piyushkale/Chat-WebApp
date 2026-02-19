@@ -2,7 +2,8 @@ const sendError = require("../services/handleError");
 const userModel = require("../models/userModel");
 const messageModel = require("../models/messageModel");
 const { Op } = require("sequelize");
-
+const { message } = require("../models/associations");
+const chat = require("../socket_io/handlers/chat");
 let waitingClients = [];
 const sendMessage = async (req, res) => {
   try {
@@ -13,7 +14,7 @@ const sendMessage = async (req, res) => {
     }
     const user = await userModel.findByPk(userId);
     // const msg = await user.createMessage({ chat });
-    const msg = await messageModel.create({chat,userId})
+    const msg = await messageModel.create({ chat, userId });
 
     waitingClients.forEach((client) => {
       client.status(200).json({ message: msg });
@@ -41,10 +42,10 @@ const getAllMessages = async (req, res) => {
   try {
     const { userId } = req.user;
     const data = await messageModel.findAll({
-      where:{receiverId:null}
-      ,include: {
+      where: { receiverId: null },
+      include: {
         model: userModel,
-        as:'sender',
+        as: "sender",
         attributes: ["name"],
       },
     });
@@ -54,7 +55,6 @@ const getAllMessages = async (req, res) => {
     return sendError(res, error, 500);
   }
 };
-
 
 const getPersonalMessages = async (req, res) => {
   try {
@@ -81,9 +81,40 @@ const getPersonalMessages = async (req, res) => {
   }
 };
 
+const sendMedia = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    let { receiverId } = req.body;
+
+    if (receiverId === "null" || receiverId == null) {
+      receiverId = null;
+    } else {
+      receiverId = Number(receiverId);
+    }
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const url = `/uploads/${req.file.filename}`;
+    const nMedia = await messageModel.create({
+      chat: "Media",
+      url,
+      messageType: "Media",
+      userId,
+      receiverId,
+    });
+
+    // include socket and do emit to the online users
+
+    res.status(200).json(nMedia);
+  } catch (error) {
+    sendError(res, error, 500);
+  }
+};
+
 module.exports = {
   sendMessage,
   getAllMessages,
   getMessage,
   getPersonalMessages,
+  sendMedia,
 };
