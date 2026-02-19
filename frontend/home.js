@@ -10,14 +10,8 @@ window.onload = async () => {
     window.location.href = "/index.html";
     return;
   }
-
   document.querySelector("body").classList.remove("hidden");
-  // await loadAllMessages();
-  const chatBox = document.getElementById("chatBox");
-  chatBox.scrollTo({
-    top: chatBox.scrollHeight,
-    behavior: "smooth",
-  });
+
   // create socket connection
   socket = io({
     auth: { token },
@@ -26,52 +20,37 @@ window.onload = async () => {
     console.log("Connected to Socket server");
     console.log("Socket ID:", socket.id);
   });
-  socket.on("message", (data) => {
-    if (!currentReceiverId) {
-      if (data.messageType === "Media") {
-        const url = data.url;
-        const senderId = data.userId;
-        const createdAt = data.createdAt;
-        const userName = data.userName;
-        const media = "img";
-        newMessage(url, senderId, createdAt, userName, media);
-        return;
-      }
+  socket.on("message", handlePublicMessage);
 
-      const chat = data.chat;
-      const senderId = data.userId;
-      const createdAt = data.createdAt;
-      const userName = data.userName;
-      newMessage(chat, senderId, createdAt, userName);
-    }
-  });
-
-  socket.on("privateMessage", (data) => {
-    const chat = data.chat;
-    const senderId = data.userId;
-    const createdAt = data.createdAt;
-    const userName = data.userName;
-    const receiverId = data.receiverId;
-
-    if (
-      (senderId === currentReceiverId && receiverId === currentUserId) ||
-      (senderId === currentUserId && receiverId === currentReceiverId)
-    ) {
-      if (data.messageType === "Media") {
-        const url = data.url;
-        const senderId = data.userId;
-        const createdAt = data.createdAt;
-        const userName = data.userName;
-        const media = "img";
-        currentRoomMessages(url, senderId, createdAt, userName, media);
-        return;
-      }
-
-      currentRoomMessages(chat, senderId, createdAt, userName);
-    }
-  });
+  socket.on("privateMessage", handlePrivateMessage);
   displayAllUsers();
 };
+
+function handlePrivateMessage(data) {
+  const chat = data.url || data.chat;
+  const senderId = data.userId;
+  const createdAt = data.createdAt;
+  const userName = data.userName;
+  const receiverId = data.receiverId;
+  const isMedia = data.messageType === "Media";
+  if (
+    (senderId === currentReceiverId && receiverId === currentUserId) ||
+    (senderId === currentUserId && receiverId === currentReceiverId)
+  ) {
+    currentRoomMessages(chat, senderId, createdAt, userName, isMedia);
+  }
+}
+
+function handlePublicMessage(data) {
+  if (currentReceiverId) return;
+  const chat = data.url || data.chat;
+  const senderId = data.userId;
+  const createdAt = data.createdAt;
+  const userName = data.userName;
+  const isMedia = data.messageType === "Media";
+
+  currentRoomMessages(chat, senderId, createdAt, userName, isMedia);
+}
 
 async function displayAllUsers() {
   const section = document.getElementById("users-section");
@@ -114,54 +93,16 @@ async function displayPersonalMessages(currentUserId, currentReceiverId) {
     const ul = document.getElementById("chatBox");
     ul.innerHTML = "";
     messages.forEach((message) => {
-      const date = new Date(message.createdAt);
-
-      if (message.messageType === "Media") {
-        const li = document.createElement("li");
-        li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
-        if (message.userId === currentUserId) {
-          li.classList.add("self-end", "bg-gray-500/40");
-        } else {
-          li.classList.add("self-start", "bg-gray-800/80");
-        }
-        const img = document.createElement("img");
-        img.src = message.url;
-        img.className = "w-80 h-60 object-cover rounded-lg";
-        const spanTime = document.createElement("span");
-        spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
-        spanTime.innerText = `${date.toLocaleString()}`;
-        const spanName = document.createElement("span");
-        spanName.className = "absolute left-0 -top-7 text-lg";
-        spanName.innerText =
-          message.userId === currentUserId ? "You" : `${message.sender.name}`;
-        li.append(img, spanTime, spanName);
-        ul.appendChild(li);
-        return;
-      }
-
-      const li = document.createElement("li");
-      li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
-      if (message.userId === currentUserId) {
-        li.classList.add("self-end", "bg-gray-500/40");
-      } else {
-        li.classList.add("self-start", "bg-gray-800/80");
-      }
-      li.innerText = `${message.chat}`;
-      const spanTime = document.createElement("span");
-      spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
-      spanTime.innerText = `${date.toLocaleString()}`;
-      const spanName = document.createElement("span");
-      spanName.className = "absolute left-0 -top-7 text-lg";
-      spanName.innerText =
-        message.userId === currentUserId ? "You" : `${message.sender.name}`;
-
-      li.append(spanTime, spanName);
-      ul.appendChild(li);
+      const isMedia = message.messageType === "Media";
+      const chat = message.url || message.chat;
+      const senderId = message.userId;
+      const createdAt = message.createdAt;
+      const userName = message.sender.name;
+      createLiElement(chat, senderId, createdAt, userName, isMedia, ul);
     });
-    // displayMessages();
-    const chatBox = document.getElementById("chatBox");
-    chatBox.scrollTo({
-      top: chatBox.scrollHeight,
+
+    ul.scrollTo({
+      top: ul.scrollHeight,
       behavior: "smooth",
     });
   } catch (error) {
@@ -225,60 +166,6 @@ function handleJoinRoom(event) {
   event.target.reset();
 }
 
-function newMessage(chat, senderId, createdAt, userName, media) {
-  const ul = document.getElementById("chatBox");
-  const date = new Date(createdAt);
-
-  if (media) {
-    const li = document.createElement("li");
-    li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
-    if (senderId === currentUserId) {
-      li.classList.add("self-end", "bg-gray-500/40");
-    } else {
-      li.classList.add("self-start", "bg-gray-800/80");
-    }
-    const img = document.createElement("img");
-    img.src = chat;
-    img.className = "w-80 h-60 object-cover rounded-lg";
-    const spanTime = document.createElement("span");
-    spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
-    spanTime.innerText = `${date.toLocaleString()}`;
-    const spanName = document.createElement("span");
-    spanName.className = "absolute left-0 -top-7 text-lg";
-    spanName.innerText = senderId === currentUserId ? "You" : `${userName}`;
-    li.append(img, spanTime, spanName);
-    ul.appendChild(li);
-  } else {
-    const li = document.createElement("li");
-    li.className =
-      "relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md";
-
-    if (senderId === currentUserId) {
-      li.classList.add("self-end", "bg-gray-500/40");
-    } else {
-      li.classList.add("self-start", "bg-gray-800/80");
-    }
-
-    li.innerText = chat;
-
-    const spanTime = document.createElement("span");
-    spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
-    spanTime.innerText = date.toLocaleString();
-
-    const spanName = document.createElement("span");
-    spanName.className = "absolute left-0 -top-7 text-lg";
-    spanName.innerText = senderId === currentUserId ? "You" : `${userName}`;
-
-    li.append(spanTime, spanName);
-    ul.appendChild(li);
-  }
-
-  ul.scrollTo({
-    top: ul.scrollHeight,
-    behavior: "smooth",
-  });
-}
-
 async function loadAllMessages() {
   currentReceiverId = null;
   const public_chat_h2 = document.getElementById("public-chat-h2");
@@ -292,59 +179,22 @@ async function loadAllMessages() {
     const response = await axios.get("/message/allMessages", {
       headers: { Authorization: token },
     });
-   
+
     const messages = response.data.messages;
     currentUserId = response.data.userId;
     const ul = document.getElementById("chatBox");
     ul.innerHTML = "";
     messages.forEach((message) => {
-      const date = new Date(message.createdAt);
-      if (message.messageType === "Media") {
-        const li = document.createElement("li");
-        li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
-        if (message.userId === currentUserId) {
-          li.classList.add("self-end", "bg-gray-500/40");
-        } else {
-          li.classList.add("self-start", "bg-gray-800/80");
-        }
-        const img = document.createElement("img");
-        img.src = message.url;
-        img.className = "w-80 h-60 object-cover rounded-lg";
-        const spanTime = document.createElement("span");
-        spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
-        spanTime.innerText = `${date.toLocaleString()}`;
-        const spanName = document.createElement("span");
-        spanName.className = "absolute left-0 -top-7 text-lg";
-        spanName.innerText =
-          message.userId === currentUserId ? "You" : `${message.sender.name}`;
-        li.append(img, spanTime, spanName);
-        ul.appendChild(li);
-        return;
-      }
-
-      const li = document.createElement("li");
-      li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
-      if (message.userId === currentUserId) {
-        li.classList.add("self-end", "bg-gray-500/40");
-      } else {
-        li.classList.add("self-start", "bg-gray-800/80");
-      }
-      li.innerText = `${message.chat}`;
-      const spanTime = document.createElement("span");
-      spanTime.className = "absolute right-0 -top-6 text-sm opacity-80";
-      spanTime.innerText = `${date.toLocaleString()}`;
-      const spanName = document.createElement("span");
-      spanName.className = "absolute left-0 -top-7 text-lg";
-      spanName.innerText =
-        message.userId === currentUserId ? "You" : `${message.sender.name}`;
-
-      li.append(spanTime, spanName);
-      ul.appendChild(li);
+      const isMedia = message.messageType === "Media";
+      const chat = message.url || message.chat;
+      const senderId = message.userId;
+      const createdAt = message.createdAt;
+      const userName = message.sender.name;
+      createLiElement(chat, senderId, createdAt, userName, isMedia, ul);
     });
-    // displayMessages();
-    const chatBox = document.getElementById("chatBox");
-    chatBox.scrollTo({
-      top: chatBox.scrollHeight,
+
+    ul.scrollTo({
+      top: ul.scrollHeight,
       behavior: "smooth",
     });
   } catch (error) {
@@ -352,11 +202,20 @@ async function loadAllMessages() {
   }
 }
 
-function currentRoomMessages(chat, senderId, createdAt, userName, media) {
+function currentRoomMessages(chat, senderId, createdAt, userName, isMedia) {
   const ul = document.getElementById("chatBox");
+
+  createLiElement(chat, senderId, createdAt, userName, isMedia, ul);
+  ul.scrollTo({
+    top: ul.scrollHeight,
+    behavior: "smooth",
+  });
+}
+
+function createLiElement(chat, senderId, createdAt, userName, isMedia, ul) {
   const date = new Date(createdAt);
 
-  if (media) {
+  if (isMedia) {
     const li = document.createElement("li");
     li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
     if (senderId === currentUserId) {
@@ -399,8 +258,4 @@ function currentRoomMessages(chat, senderId, createdAt, userName, media) {
     li.append(spanTime, spanName);
     ul.appendChild(li);
   }
-  ul.scrollTo({
-    top: ul.scrollHeight,
-    behavior: "smooth",
-  });
 }
