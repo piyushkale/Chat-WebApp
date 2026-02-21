@@ -94,6 +94,14 @@ A full-stack real-time chat application built using **Node.js, Express, MySQL, a
 
 ---
 
+<h2 align="center">📸 Application Preview</h2>
+
+<p align="center">
+    <img src="frontend/assets/login-authentication.png" width="800"/>
+  <img src="frontend/assets/a-private-message.png" width="800"/>
+  <img src="frontend/assets/image-sharing.png" width="800"/>
+</p>
+
 ## 📦 Installation
 
 ### 1️⃣ Clone the repository
