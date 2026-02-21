@@ -36,10 +36,16 @@
                 class="w-full bg-gray-100/90 text-black"
                 type="email"
                 name="email"
-                placeholder="Join room" required
-              /><br /><button type="submit" class="bg-blue-600/90 px-2 rounded-sm mt-2 cursor-pointer hover:scale-95">Join</button>
+                placeholder="Join room"
+                required
+              /><br /><button
+                type="submit"
+                class="bg-blue-600/90 px-2 rounded-sm mt-2 cursor-pointer hover:scale-95"
+              >
+                Join
+              </button>
             </form>
-           <h2 id="public-chat-h2" onclick="loadAllMessages()">Public Chat</h2>
+            <h2 id="public-chat-h2" onclick="loadAllMessages()">Public Chat</h2>
           </section>
           <ul
             id="chatBox"
@@ -51,14 +57,26 @@
 
         <!-- Input -->
         <div class="shrink-0 bg-slate-900/70 p-6 border-t border-white/10">
-          <div class="inline-flex w-full [&_input]:bg-gray-500 mb-2 gap-2">
-            <input type="file" id="file" class="px-2 text-black rounded-md"/>
-            <button onclick="sendFile()" class="px-6 bg-linear-to-r from-emerald-400 to-green-700 rounded-md font-bold hover:to-emerald-500 transition-all duration-300 cursor-pointer">Upload</button>
+          <div
+            class="inline-flex justify-end w-full [&_input]:bg-gray-500 mb-2 gap-2"
+          >
+            <input type="file" id="file" class="px-2 text-black rounded-md" />
+            <button
+              onclick="sendFile()"
+              class="px-6 bg-linear-to-r from-emerald-400 to-green-700 rounded-md font-bold hover:to-emerald-500 transition-all duration-300 cursor-pointer"
+            >
+              Upload
+            </button>
           </div>
-          <form class="flex gap-4" onsubmit="formSendMessage(event)">
+          <form class="flex gap-4 relative" onsubmit="formSendMessage(event)">
+            <div
+              id="suggestion-div"
+              class="hidden absolute -top-10 left-20 bg-slate-800 text-slate-200 text-sm px-3 py-2 rounded-lg shadow-lg border border-slate-700 cursor-pointer hover:bg-slate-700 transition-all duration-150"
+            ></div>
             <input
               type="text"
               name="chat"
+              autocomplete="off"
               placeholder="Type a message..."
               required
               class="flex-1 py-2 px-3 text-lg text-white rounded-md bg-gray-500/40 outline-none focus:ring-2 focus:ring-emerald-400"
