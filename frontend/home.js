@@ -217,7 +217,7 @@ function createLiElement(chat, senderId, createdAt, userName, isMedia, ul) {
 
   if (isMedia) {
     const li = document.createElement("li");
-    li.className = `relative text-md md:text-2xl max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
+    li.className = `relative text-md max-md:w-[75%] md:max-w-[50%] md:min-w-[25%] p-2 wrap-anywhere outline-gray-500/50 outline rounded-md`;
     if (senderId === currentUserId) {
       li.classList.add("self-end", "bg-gray-500/40");
     } else {
@@ -311,3 +311,4 @@ function displaySuggestion(suggestion) {
     inputMessage.focus();
   };
 }
+
