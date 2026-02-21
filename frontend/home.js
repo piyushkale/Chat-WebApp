@@ -259,3 +259,55 @@ function createLiElement(chat, senderId, createdAt, userName, isMedia, ul) {
     ul.appendChild(li);
   }
 }
+
+
+
+// Ai chat suggestion
+
+let timeout;
+
+const inputMessage = document.querySelector('input[name="chat"]');
+const suggestionDiv = document.getElementById("suggestion-div");
+
+inputMessage.addEventListener("input", () => {
+  clearTimeout(timeout);
+
+  const text = inputMessage.value.trim();
+
+  if (text.length <= 5) {
+    suggestionDiv.classList.add("hidden");
+    return;
+  }
+
+  timeout = setTimeout(async () => {
+    try {
+      const res = await axios.post("/ai/suggest", {
+        partialText: text,
+      });
+
+      const suggestion = res.data.suggestion;
+
+      if (!suggestion) {
+        suggestionDiv.classList.add("hidden");
+        return;
+      }
+
+      displaySuggestion(suggestion);
+
+    } catch (err) {
+      console.error("AI Error:", err);
+      suggestionDiv.classList.add("hidden");
+    }
+  }, 500);
+});
+
+function displaySuggestion(suggestion) {
+  suggestionDiv.innerText = suggestion;
+  suggestionDiv.classList.remove("hidden");
+
+  suggestionDiv.onclick = () => {
+    inputMessage.value += " " + suggestion;
+    suggestionDiv.classList.add("hidden");
+    inputMessage.focus();
+  };
+}
